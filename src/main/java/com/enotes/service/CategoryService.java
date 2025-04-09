@@ -2,10 +2,15 @@ package com.enotes.service;
 
 import java.util.List;
 
+import com.enotes.dto.CategoryDto;
+import com.enotes.dto.CategoryResponse;
 import com.enotes.model.Category;
+import com.enotes.repository.CategoryRepository;
 
 public interface CategoryService {
-	public Boolean saveCategory(Category category);
+	public Boolean saveCategory(CategoryDto categoryDto);
 
-	public List<Category> getAllCategory();
+	public List<CategoryDto> getAllCategory();
+
+	public List<CategoryResponse> getActiveCategory();
 }

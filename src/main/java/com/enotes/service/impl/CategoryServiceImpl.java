@@ -1,12 +1,16 @@
 package com.enotes.service.impl;
 
+import java.nio.MappedByteBuffer;
 import java.util.Date;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import com.enotes.dto.CategoryDto;
+import com.enotes.dto.CategoryResponse;
 import com.enotes.model.Category;
 import com.enotes.repository.CategoryRepository;
 import com.enotes.service.CategoryService;
@@ -15,10 +19,19 @@ import com.enotes.service.CategoryService;
 public class CategoryServiceImpl implements CategoryService {
 	@Autowired
 	private CategoryRepository categoryRepository;
+	@Autowired
+	private ModelMapper modelMapper;
 
 	@Override
-	public Boolean saveCategory(Category category) {
-		// TODO Auto-generated method stub
+	public Boolean saveCategory(CategoryDto categoryDto) {
+		// TODO Auto-generated method stubS
+//		Category category = new Category();
+//		category.setName(categoryDto.getName());
+//		category.setDescription(categoryDto.getDescription());
+//		category.setIsActive(categoryDto.getIsActive());
+
+		Category category = modelMapper.map(categoryDto, Category.class);
+
 		category.setIsDeleted(false);
 		category.setCreatedBy(1);
 		category.setCreatedOn(new Date());
@@ -30,10 +43,20 @@ public class CategoryServiceImpl implements CategoryService {
 	}
 
 	@Override
-	public List<Category> getAllCategory() {
+	public List<CategoryDto> getAllCategory() {
 		// TODO Auto-generated method stub
-		List<Category> all = categoryRepository.findAll();
-		return all;
+		List<Category> categories = categoryRepository.findAll();
+		List<CategoryDto> categoryDtosList = categories.stream().map(cat -> modelMapper.map(cat, CategoryDto.class))
+				.toList();
+		return categoryDtosList;
+	}
+
+	@Override
+	public List<CategoryResponse> getActiveCategory() {
+		List<Category> categories = categoryRepository.findByIsActive(true);
+		List<CategoryResponse> categoryResponsesList = categories.stream()
+				.map(cat -> modelMapper.map(cat, CategoryResponse.class)).toList();
+		return categoryResponsesList;
 	}
 
 }
