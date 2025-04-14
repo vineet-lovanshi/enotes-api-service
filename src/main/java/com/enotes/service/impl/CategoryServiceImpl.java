@@ -3,6 +3,7 @@ package com.enotes.service.impl;
 import java.nio.MappedByteBuffer;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
 //		category.setIsActive(categoryDto.getIsActive());
 
 		Category category = modelMapper.map(categoryDto, Category.class);
-
+//		category.setIsActive(true);
 		category.setIsDeleted(false);
 		category.setCreatedBy(1);
 		category.setCreatedOn(new Date());
@@ -45,7 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
 	@Override
 	public List<CategoryDto> getAllCategory() {
 		// TODO Auto-generated method stub
-		List<Category> categories = categoryRepository.findAll();
+		List<Category> categories = categoryRepository.findByIsDeletedFalse();
 		List<CategoryDto> categoryDtosList = categories.stream().map(cat -> modelMapper.map(cat, CategoryDto.class))
 				.toList();
 		return categoryDtosList;
@@ -53,10 +54,32 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public List<CategoryResponse> getActiveCategory() {
-		List<Category> categories = categoryRepository.findByIsActive(true);
+		List<Category> categories = categoryRepository.findByIsActiveTrueAndIsDeletedFalse();
 		List<CategoryResponse> categoryResponsesList = categories.stream()
 				.map(cat -> modelMapper.map(cat, CategoryResponse.class)).toList();
 		return categoryResponsesList;
+	}
+
+	@Override
+	public CategoryDto getCategoryById(Integer id) {
+		Optional<Category> byId = categoryRepository.findByIdAndIsDeletedFalse(id);
+		if (byId.isPresent()) {
+			Category category = byId.get();
+			return modelMapper.map(category, CategoryDto.class);
+		}
+		return null;
+	}
+
+	@Override
+	public Boolean deleteCategoryById(Integer id) {
+		Optional<Category> byId = categoryRepository.findById(id);
+		if (byId.isPresent()) {
+			Category category = byId.get();
+			category.setIsDeleted(true);
+			categoryRepository.save(category);
+			return true;
+		}
+		return false;
 	}
 
 }
