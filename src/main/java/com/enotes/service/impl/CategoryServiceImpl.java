@@ -1,6 +1,5 @@
 package com.enotes.service.impl;
 
-import java.nio.MappedByteBuffer;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -33,14 +32,32 @@ public class CategoryServiceImpl implements CategoryService {
 
 		Category category = modelMapper.map(categoryDto, Category.class);
 //		category.setIsActive(true);
-		category.setIsDeleted(false);
-		category.setCreatedBy(1);
-		category.setCreatedOn(new Date());
+		if(ObjectUtils.isEmpty(category.getId())) {
+			category.setIsDeleted(false);
+			category.setCreatedBy(1);
+			category.setCreatedOn(new Date());
+		}else {
+			updateCategory(category);
+		}
+		
 		Category saveCategory = categoryRepository.save(category);
 		if (ObjectUtils.isEmpty(saveCategory)) {
 			return false;
 		}
 		return true;
+	}
+
+	private void updateCategory(Category category) {
+		Optional<Category> byId = categoryRepository.findById(category.getId());
+		if(byId.isPresent()) {
+			Category existCategory = byId.get();
+			category.setCreatedBy(existCategory.getCreatedBy());
+			category.setCreatedOn(existCategory.getCreatedOn());
+			category.setIsDeleted(existCategory.getIsDeleted());
+			category.setUpdatedBy(existCategory.getId());
+			category.setUpdatedOn(new Date());
+		}
+		
 	}
 
 	@Override
