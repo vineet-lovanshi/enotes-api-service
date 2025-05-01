@@ -15,6 +15,7 @@ import com.enotes.exception.ResourceNotFoundException;
 import com.enotes.model.Category;
 import com.enotes.repository.CategoryRepository;
 import com.enotes.service.CategoryService;
+import com.enotes.util.Validation;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -23,24 +24,25 @@ public class CategoryServiceImpl implements CategoryService {
 	@Autowired
 	private ModelMapper modelMapper;
 
+	@Autowired
+	private Validation validation;
+
 	@Override
 	public Boolean saveCategory(CategoryDto categoryDto) {
-		// TODO Auto-generated method stubS
-//		Category category = new Category();
-//		category.setName(categoryDto.getName());
-//		category.setDescription(categoryDto.getDescription());
-//		category.setIsActive(categoryDto.getIsActive());
+
+		// Validation checking
+		validation.categoryValidation(categoryDto);
 
 		Category category = modelMapper.map(categoryDto, Category.class);
 //		category.setIsActive(true);
-		if(ObjectUtils.isEmpty(category.getId())) {
+		if (ObjectUtils.isEmpty(category.getId())) {
 			category.setIsDeleted(false);
 			category.setCreatedBy(1);
 			category.setCreatedOn(new Date());
-		}else {
+		} else {
 			updateCategory(category);
 		}
-		
+
 		Category saveCategory = categoryRepository.save(category);
 		if (ObjectUtils.isEmpty(saveCategory)) {
 			return false;
@@ -50,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	private void updateCategory(Category category) {
 		Optional<Category> byId = categoryRepository.findById(category.getId());
-		if(byId.isPresent()) {
+		if (byId.isPresent()) {
 			Category existCategory = byId.get();
 			category.setCreatedBy(existCategory.getCreatedBy());
 			category.setCreatedOn(existCategory.getCreatedOn());
@@ -58,7 +60,7 @@ public class CategoryServiceImpl implements CategoryService {
 			category.setUpdatedBy(existCategory.getId());
 			category.setUpdatedOn(new Date());
 		}
-		
+
 	}
 
 	@Override
@@ -80,7 +82,8 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public CategoryDto getCategoryById(Integer id) throws Exception {
-		Category byId = categoryRepository.findByIdAndIsDeletedFalse(id).orElseThrow(()->new ResourceNotFoundException("Category not found with id "+id));
+		Category byId = categoryRepository.findByIdAndIsDeletedFalse(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found with id " + id));
 		if (!ObjectUtils.isEmpty(byId)) {
 			byId.getName().toUpperCase();
 			return modelMapper.map(byId, CategoryDto.class);
