@@ -2,6 +2,7 @@ package com.enotes.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -25,5 +26,15 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(ValidationException.class)
 	public ResponseEntity<?> handleValidationException(ValidationException e) {
 		return new ResponseEntity<>(e.getError(), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(ExixtDataException.class)
+	public ResponseEntity<?> handleExixtDataException(ExixtDataException e) {
+		return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+	}
+	
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+		return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
 	}
 }
