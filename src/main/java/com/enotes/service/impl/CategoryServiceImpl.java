@@ -33,17 +33,12 @@ public class CategoryServiceImpl implements CategoryService {
 
 		// Validation checking
 		validation.categoryValidation(categoryDto);
-		
-		//check existing
-//		Boolean exisBoolean=categoryRepository.existsByName(categoryDto.getName().trim());
-//		if(exisBoolean) {
-//			//throw error
-//			throw new ExixtDataException("Category allresdy exist");
-//		}
 
 		Category category = modelMapper.map(categoryDto, Category.class);
 //		category.setIsActive(true);
 		if (ObjectUtils.isEmpty(category.getId())) {
+			
+			//check existing
 			Boolean exisBoolean=categoryRepository.existsByName(categoryDto.getName().trim());
 			if(exisBoolean) {
 				//throw error

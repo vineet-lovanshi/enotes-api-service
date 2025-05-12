@@ -1,6 +1,7 @@
 package com.enotes.util;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ import com.enotes.exception.ValidationException;
 public class Validation {
 	public void categoryValidation(CategoryDto categoryDto) {
 
-		Map<String, Object> errorMap = new HashMap<>();
+		Map<String, Object> errorMap = new LinkedHashMap<>();
 
 		if (ObjectUtils.isEmpty(categoryDto)) {
 			throw new IllegalArgumentException("Category Object Should'n be Null or Empty");
