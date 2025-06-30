@@ -39,7 +39,6 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<?> handleValidationException(ValidationException e) {
 //		return new ResponseEntity<>(e.getError(), HttpStatus.BAD_REQUEST);
 		return  CommonUtils.createErrorResponse(e.getError(), HttpStatus.BAD_REQUEST);
-
 	}
 
 	@ExceptionHandler(ExixtDataException.class)
