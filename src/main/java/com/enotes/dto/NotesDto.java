@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -24,15 +23,15 @@ public class NotesDto {
 	private String description;
 
 	private CategoryDto category;
-	
+
 	private Integer createdBy;
-	
+
 	private Date createdOn;
-	
+
 	private Integer updateBy;
-	
+
 	private Date updatedOn;
-	
+
 	@Getter
 	@Setter
 	@AllArgsConstructor
