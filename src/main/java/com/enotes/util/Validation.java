@@ -11,6 +11,7 @@ import com.enotes.exception.ValidationException;
 
 @Component
 public class Validation {
+
 	public void categoryValidation(CategoryDto categoryDto) {
 
 		Map<String, Object> errorMap = new LinkedHashMap<>();
@@ -18,22 +19,34 @@ public class Validation {
 		if (ObjectUtils.isEmpty(categoryDto)) {
 			throw new IllegalArgumentException("Category Object Should'n be Null or Empty");
 		} else {
-			// validation name field
+			// validate name field
 			if (ObjectUtils.isEmpty(categoryDto.getName())) {
-				errorMap.put("Name", "Name feild is empty or null");
+				errorMap.put("name", "Name field is empty or null");
 			} else {
-				if (categoryDto.getName().length() < 3) {
-					errorMap.put("Name", "Name length min 3");
-				}
-				if (categoryDto.getName().length() > 100) {
-					errorMap.put("Name", "Name length max 100");
+				String name = categoryDto.getName().trim();
+
+				if (name.isEmpty()) {
+					errorMap.put("name", "Name cannot contain only whitespace");
+				} else {
+					if (name.length() < 3) {
+						errorMap.put("name", "Name length must be at least 3 characters");
+					}
+					if (name.length() > 100) {
+						errorMap.put("name", "Name length must not exceed 100 characters");
+					}
+
 				}
 			}
 
 			// validation description field
 			if (ObjectUtils.isEmpty(categoryDto.getDescription())) {
-				errorMap.put("Description", "Description feild is empty or null");
-			}
+				errorMap.put("description", "Description feild is empty or null");
+			} else {
+				String description = categoryDto.getDescription().trim();
+
+				if (description.isEmpty()) {
+					errorMap.put("description", "Description cannot contain only whitespace");
+				}}
 
 			// validation isActive field
 			if (ObjectUtils.isEmpty(categoryDto.getIsActive())) {
