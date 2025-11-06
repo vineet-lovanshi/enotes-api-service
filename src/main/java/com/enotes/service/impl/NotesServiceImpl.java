@@ -90,8 +90,8 @@ public class NotesServiceImpl implements NotesService {
 			long upload = Files.copy(file.getInputStream(), Paths.get(storePath));
 
 			if (upload != 0) {
-				FileDetails saveFileDtls = fileRepository.save(fileDetails);
-				return saveFileDtls;
+				FileDetails saveFileDetails = fileRepository.save(fileDetails);
+				return saveFileDetails;
 			}
 		}
 		return null;
