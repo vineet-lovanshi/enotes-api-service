@@ -46,7 +46,8 @@ public class Validation {
 
 				if (description.isEmpty()) {
 					errorMap.put("description", "Description cannot contain only whitespace");
-				}}
+				}
+			}
 
 			// validation isActive field
 			if (ObjectUtils.isEmpty(categoryDto.getIsActive())) {

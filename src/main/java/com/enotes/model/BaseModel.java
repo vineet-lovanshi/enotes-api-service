@@ -8,6 +8,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,4 +33,8 @@ public abstract class BaseModel {
 	@LastModifiedDate
 	@Column(insertable = false)
 	private Date updatedOn;
+	
+	@ManyToOne
+	private FileDetails fileDetails;
+	
 }

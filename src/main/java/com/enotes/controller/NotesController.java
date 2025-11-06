@@ -2,6 +2,7 @@ package com.enotes.controller;
 
 import java.util.List;
 
+import org.modelmapper.internal.bytebuddy.implementation.bytecode.constant.DefaultValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.enotes.dto.NotesDto;
 import com.enotes.service.NotesService;
@@ -24,8 +27,8 @@ public class NotesController {
 	private NotesService notesService;
 
 	@PostMapping("/")
-	public ResponseEntity<?> saveNotes(@RequestBody NotesDto notesDto) throws Exception {
-		Boolean saveNotes = notesService.saveNotes(notesDto);
+	public ResponseEntity<?> saveNotes(@RequestParam String notes , @RequestParam(required = false) MultipartFile file) throws Exception {
+		Boolean saveNotes = notesService.saveNotes(notes,file);
 		if (saveNotes) {
 			return CommonUtils.createBuildResponseMessage("Notes saved success", HttpStatus.CREATED);
 		}
