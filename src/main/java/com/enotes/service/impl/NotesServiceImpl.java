@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,12 +48,16 @@ public class NotesServiceImpl implements NotesService {
 	public Boolean saveNotes(String notes, MultipartFile file) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		NotesDto notesDto = objectMapper.readValue(notes, NotesDto.class);
-
-		FileDetails fileDetails = saveFileDetails(file);
-
 //		 category validation
 		checkCategoryExist(notesDto.getCategory());
 		Notes map = mapper.map(notesDto, Notes.class);
+
+		FileDetails fileDetails = saveFileDetails(file);
+		if (!ObjectUtils.isEmpty(fileDetails)) {
+			map.setFileDetails(fileDetails);
+		} else {
+			map.setFileDetails(null);
+		}
 		Notes saveNotes = notesRepository.save(map);
 
 		if (!ObjectUtils.isEmpty(saveNotes)) {
@@ -62,20 +67,21 @@ public class NotesServiceImpl implements NotesService {
 	}
 
 	private FileDetails saveFileDetails(MultipartFile file) throws IOException {
-		if (!file.isEmpty()) {
-			FileDetails fileDetails = new FileDetails();
-
+		if (!ObjectUtils.isEmpty(file) && !file.isEmpty()) {
+			
 			String originalFilename = file.getOriginalFilename();
-			fileDetails.setOriginalFileName(originalFilename);
-			fileDetails.setDisplayFileName(getDisplayName(originalFilename));
-
-			String rendomString = UUID.randomUUID().toString();
 			String extension = FilenameUtils.getExtension(originalFilename);
+			List<String> extensionAllow = Arrays.asList("pdf","xlsx","jpg");
+			
+			if(!extensionAllow.contains(extension)) {
+				throw new IllegalArgumentException("Invalid file format ! uplaod only .pdf , .xlsx , .jpg format");
+			}
+			
+			String rendomString = UUID.randomUUID().toString();
+
 			String uploadFileName = rendomString + "." + extension;
 
-			fileDetails.setUploadFileName(uploadFileName);
-			fileDetails.setFileSize(file.getSize());
-
+			
 			File saveFile = new File(uploadPath);
 			if (!saveFile.exists()) {
 				saveFile.mkdir();
@@ -85,11 +91,17 @@ public class NotesServiceImpl implements NotesService {
 
 			String storePath = uploadPath.concat(uploadFileName);
 
-			fileDetails.setPath(storePath);
+			
 
 			long upload = Files.copy(file.getInputStream(), Paths.get(storePath));
 
 			if (upload != 0) {
+				FileDetails fileDetails = new FileDetails();
+				fileDetails.setOriginalFileName(originalFilename);
+				fileDetails.setDisplayFileName(getDisplayName(originalFilename));
+				fileDetails.setUploadFileName(uploadFileName);
+				fileDetails.setFileSize(file.getSize());
+				fileDetails.setPath(storePath);
 				FileDetails saveFileDetails = fileRepository.save(fileDetails);
 				return saveFileDetails;
 			}
