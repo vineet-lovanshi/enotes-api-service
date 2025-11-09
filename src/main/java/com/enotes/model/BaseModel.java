@@ -21,20 +21,17 @@ public abstract class BaseModel {
 	@CreatedBy
 	@Column(updatable = false)
 	private Integer createdBy;
-	
+
 	@CreatedDate
 	@Column(updatable = false)
 	private Date createdOn;
-	
+
 	@LastModifiedBy
-	@Column(insertable  = false)
+	@Column(insertable = false)
 	private Integer updatedBy;
-	
+
 	@LastModifiedDate
 	@Column(insertable = false)
 	private Date updatedOn;
-	
-	@ManyToOne
-	private FileDetails fileDetails;
-	
+
 }

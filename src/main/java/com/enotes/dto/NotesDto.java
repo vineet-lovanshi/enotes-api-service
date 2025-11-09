@@ -2,9 +2,6 @@ package com.enotes.dto;
 
 import java.util.Date;
 
-import com.enotes.model.Category;
-
-import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,6 +28,18 @@ public class NotesDto {
 	private Integer updateBy;
 
 	private Date updatedOn;
+
+	private FileDto fileDetails;
+
+	@Getter
+	@Setter
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class FileDto {
+		private Integer id;
+		private String displayFileName;
+		private String originalFileName;
+	}
 
 	@Getter
 	@Setter
