@@ -1,11 +1,14 @@
 package com.enotes.service.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.enotes.dto.NotesDto;
@@ -68,20 +72,19 @@ public class NotesServiceImpl implements NotesService {
 
 	private FileDetails saveFileDetails(MultipartFile file) throws IOException {
 		if (!ObjectUtils.isEmpty(file) && !file.isEmpty()) {
-			
+
 			String originalFilename = file.getOriginalFilename();
 			String extension = FilenameUtils.getExtension(originalFilename);
-			List<String> extensionAllow = Arrays.asList("pdf","xlsx","jpg");
-			
-			if(!extensionAllow.contains(extension)) {
+			List<String> extensionAllow = Arrays.asList("pdf", "xlsx", "jpg");
+
+			if (!extensionAllow.contains(extension)) {
 				throw new IllegalArgumentException("Invalid file format ! uplaod only .pdf , .xlsx , .jpg format");
 			}
-			
+
 			String rendomString = UUID.randomUUID().toString();
 
 			String uploadFileName = rendomString + "." + extension;
 
-			
 			File saveFile = new File(uploadPath);
 			if (!saveFile.exists()) {
 				saveFile.mkdir();
@@ -90,8 +93,6 @@ public class NotesServiceImpl implements NotesService {
 			// path : enotes-api-service/notesFile/java.pdf
 
 			String storePath = uploadPath.concat(uploadFileName);
-
-			
 
 			long upload = Files.copy(file.getInputStream(), Paths.get(storePath));
 
@@ -139,4 +140,18 @@ public class NotesServiceImpl implements NotesService {
 
 	}
 
+	@Override
+	public byte[] downloadFile(FileDetails fileDetails) throws Exception {
+
+		InputStream io = new FileInputStream(fileDetails.getPath());
+		return StreamUtils.copyToByteArray(io);
+
+	}
+
+	@Override
+	public FileDetails getFileDetails(Integer id) throws Exception {
+		FileDetails fileDtls = fileRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("File is not available"));
+		return fileDtls;
+	}
 }
