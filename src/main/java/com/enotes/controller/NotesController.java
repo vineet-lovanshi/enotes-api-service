@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.enotes.dto.NotesDto;
+import com.enotes.dto.NotesResponse;
 import com.enotes.model.FileDetails;
 import com.enotes.service.NotesService;
 import com.enotes.util.CommonUtils;
@@ -56,6 +57,17 @@ public class NotesController {
 		if (CollectionUtils.isEmpty(allNotes)) {
 			return ResponseEntity.noContent().build();
 		}
+		return CommonUtils.createBuildResponse(allNotes, HttpStatus.OK);
+	}
+
+	@GetMapping("/user-notes")
+	public ResponseEntity<?> getAllNotesByUser(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+			@RequestParam(name = "pageSize", defaultValue = "3") Integer pageSize) {
+		Integer userId = 2;
+		NotesResponse allNotes = notesService.getAllNotesByUser(userId , pageNo ,pageSize);
+//		if (CollectionUtils.isEmpty(allNotes)) {
+//			return ResponseEntity.noContent().build();
+//		}
 		return CommonUtils.createBuildResponse(allNotes, HttpStatus.OK);
 	}
 }
