@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.enotes.dto.NotesDto;
 import com.enotes.dto.NotesDto.CategoryDto;
+import com.enotes.dto.NotesDto.FileDto;
 import com.enotes.dto.NotesResponse;
 import com.enotes.exception.ResourceNotFoundException;
 import com.enotes.model.FileDetails;
@@ -56,6 +57,11 @@ public class NotesServiceImpl implements NotesService {
 	public Boolean saveNotes(String notes, MultipartFile file) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		NotesDto notesDto = objectMapper.readValue(notes, NotesDto.class);
+
+		if (!ObjectUtils.isEmpty(notesDto.getId())) {
+			updateNotes(notesDto, file);
+		}
+
 //		 category validation
 		checkCategoryExist(notesDto.getCategory());
 		Notes map = mapper.map(notesDto, Notes.class);
@@ -64,7 +70,9 @@ public class NotesServiceImpl implements NotesService {
 		if (!ObjectUtils.isEmpty(fileDetails)) {
 			map.setFileDetails(fileDetails);
 		} else {
-			map.setFileDetails(null);
+			if (ObjectUtils.isEmpty(notesDto.getId())) {
+				map.setFileDetails(null);
+			}
 		}
 		Notes saveNotes = notesRepository.save(map);
 
@@ -72,6 +80,22 @@ public class NotesServiceImpl implements NotesService {
 			return true;
 		}
 		return false;
+	}
+
+	private void updateNotes(NotesDto notesDto, MultipartFile file) throws Exception {
+		// TODO Auto-generated method stub
+		Notes existNotes = notesRepository.findById(notesDto.getId())
+				.orElseThrow(() -> new ResourceNotFoundException("Invalid notes id"));
+
+		FileDetails fileDetails = existNotes.getFileDetails();
+		FileDto map = mapper.map(fileDetails, FileDto.class);
+
+		if (ObjectUtils.isEmpty(file)) {
+			notesDto.setFileDetails(map);
+		}
+
+		
+
 	}
 
 	private FileDetails saveFileDetails(MultipartFile file) throws IOException {
@@ -131,7 +155,7 @@ public class NotesServiceImpl implements NotesService {
 	}
 
 	private void checkCategoryExist(CategoryDto category) throws Exception {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub;
 
 		categoryRepo.findById(category.getId())
 				.orElseThrow(() -> new ResourceNotFoundException("category id is invalid"));
