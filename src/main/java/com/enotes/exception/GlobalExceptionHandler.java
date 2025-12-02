@@ -42,16 +42,16 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(ExixtDataException.class)
 	public ResponseEntity<?> handleExixtDataException(ExixtDataException e) {
-		return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+		return CommonUtils.createErrorResponseMessage(e.getMessage(), HttpStatus.CONFLICT);
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-		return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+		return CommonUtils.createErrorResponseMessage(e.getMessage(), HttpStatus.CONFLICT);
 	}
 
 	@ExceptionHandler(FileNotFoundException.class)
 	public ResponseEntity<?> handleFileNotFoundExceptionException(FileNotFoundException e) {
-		return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+		return CommonUtils.createErrorResponseMessage(e.getMessage(), HttpStatus.CONFLICT);
 	}
 }

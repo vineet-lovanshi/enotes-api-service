@@ -30,6 +30,10 @@ public class NotesDto {
 	private Date updatedOn;
 
 	private FileDto fileDetails;
+	
+	private Boolean isDeleted;
+
+	private Date deletedOn;
 
 	@Getter
 	@Setter
@@ -49,4 +53,5 @@ public class NotesDto {
 		private Integer id;
 		private String name;
 	}
+
 }

@@ -8,6 +8,7 @@ import com.enotes.model.Category;
 import com.enotes.repository.CategoryRepository;
 
 public interface CategoryService {
+	
 	public Boolean saveCategory(CategoryDto categoryDto);
 
 	public List<CategoryDto> getAllCategory();

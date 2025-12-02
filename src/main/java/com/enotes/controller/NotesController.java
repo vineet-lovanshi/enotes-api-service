@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,13 +62,40 @@ public class NotesController {
 	}
 
 	@GetMapping("/user-notes")
-	public ResponseEntity<?> getAllNotesByUser(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
-			@RequestParam(name = "pageSize", defaultValue = "3") Integer pageSize) {
+	public ResponseEntity<?> getAllNotesByUser(@RequestParam(name = "pageNo", defaultValue = "0") Integer pageNo,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 		Integer userId = 2;
-		NotesResponse allNotes = notesService.getAllNotesByUser(userId , pageNo ,pageSize);
+		NotesResponse allNotes = notesService.getAllNotesByUser(userId, pageNo, pageSize);
 //		if (CollectionUtils.isEmpty(allNotes)) {
 //			return ResponseEntity.noContent().build();
 //		}
 		return CommonUtils.createBuildResponse(allNotes, HttpStatus.OK);
+	}
+
+	@GetMapping("/delete/{id}")
+	public ResponseEntity<?> deleteNotes(@PathVariable Integer id) throws Exception {
+
+		Boolean deleted = notesService.softDeleteNotes(id);
+		return CommonUtils.createBuildResponseMessage("Deleted Succesfully", HttpStatus.OK);
+
+	}
+
+	@GetMapping("/restore/{id}")
+	public ResponseEntity<?> restoreNotes(@PathVariable Integer id) throws Exception {
+
+		Boolean restore = notesService.restoreNotes(id);
+		return CommonUtils.createBuildResponseMessage("Restore Succesfully", HttpStatus.OK);
+
+	}
+
+	@GetMapping("/recycle-bin")
+	public ResponseEntity<?> getUserRecycleBinNotes() throws Exception {
+		Integer userId = 2;
+		List<NotesDto> notes = notesService.getUserRecycleBinNotes(userId);
+		if (ObjectUtils.isEmpty(notes)) {
+			return CommonUtils.createBuildResponseMessage("Notes not available in recycle bin", HttpStatus.OK);
+		}
+		return CommonUtils.createBuildResponse(notes, HttpStatus.OK);
+
 	}
 }
