@@ -13,10 +13,16 @@ public interface NotesService {
 	public Boolean saveNotes(String notes, MultipartFile file) throws Exception;
 
 	public List<NotesDto> getAllNotes();
-	
-	public NotesResponse getAllNotesByUser(Integer userId , Integer pageNo , Integer pageSize );
+
+	public NotesResponse getAllNotesByUser(Integer userId, Integer pageNo, Integer pageSize);
 
 	public FileDetails getFileDetails(Integer id) throws Exception;
 
 	byte[] downloadFile(FileDetails fileDetails) throws Exception;
+
+	public Boolean softDeleteNotes(Integer id) throws Exception;
+
+	public Boolean restoreNotes(Integer id) throws Exception;
+
+	public List<NotesDto> getUserRecycleBinNotes(Integer userId);
 }

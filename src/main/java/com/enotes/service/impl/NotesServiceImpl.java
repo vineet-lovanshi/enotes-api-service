@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,6 +59,9 @@ public class NotesServiceImpl implements NotesService {
 		ObjectMapper objectMapper = new ObjectMapper();
 		NotesDto notesDto = objectMapper.readValue(notes, NotesDto.class);
 
+		notesDto.setIsDeleted(false);
+		notesDto.setDeletedOn(null);
+
 		if (!ObjectUtils.isEmpty(notesDto.getId())) {
 			updateNotes(notesDto, file);
 		}
@@ -94,8 +98,6 @@ public class NotesServiceImpl implements NotesService {
 			notesDto.setFileDetails(map);
 		}
 
-		
-
 	}
 
 	private FileDetails saveFileDetails(MultipartFile file) throws IOException {
@@ -103,10 +105,10 @@ public class NotesServiceImpl implements NotesService {
 
 			String originalFilename = file.getOriginalFilename();
 			String extension = FilenameUtils.getExtension(originalFilename);
-			List<String> extensionAllow = Arrays.asList("pdf", "xlsx", "jpg");
+			List<String> extensionAllow = Arrays.asList("pdf", "xlsx", "jpg","png");
 
 			if (!extensionAllow.contains(extension)) {
-				throw new IllegalArgumentException("Invalid file format ! uplaod only .pdf , .xlsx , .jpg format");
+				throw new IllegalArgumentException("Invalid file format ! uplaod only .pdf , .xlsx , .jpg or .png format");
 			}
 
 			String rendomString = UUID.randomUUID().toString();
@@ -187,7 +189,7 @@ public class NotesServiceImpl implements NotesService {
 	public NotesResponse getAllNotesByUser(Integer userId, Integer pageNo, Integer pageSize) {
 
 		Pageable pageable = PageRequest.of(pageNo, pageSize);
-		Page<Notes> notPage = notesRepository.findByCreatedBy(userId, pageable);
+		Page<Notes> notPage = notesRepository.findByCreatedByAndIsDeletedFalse(userId, pageable);
 
 		List<NotesDto> notesDtos = notPage.get().map(n -> mapper.map(n, NotesDto.class)).toList();
 
@@ -195,5 +197,38 @@ public class NotesServiceImpl implements NotesService {
 				.pageSize(notPage.getSize()).totoalElements(notPage.getTotalElements())
 				.totalPages(notPage.getTotalPages()).isFirst(notPage.isFirst()).isLast(notPage.isLast()).build();
 		return notesResponse;
+	}
+
+	@Override
+	public Boolean softDeleteNotes(Integer id) throws Exception {
+		Notes notes = notesRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Notes id invalid ! Not found"));
+		notes.setIsDeleted(true);
+		notes.setDeletedOn(new Date());
+		Notes save = notesRepository.save(notes);
+		if (!ObjectUtils.isEmpty(save)) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public Boolean restoreNotes(Integer id) throws Exception {
+		Notes notes = notesRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Notes id invalid ! Not found"));
+		notes.setIsDeleted(false);
+		notes.setDeletedOn(null);
+		Notes save = notesRepository.save(notes);
+		if (!ObjectUtils.isEmpty(save)) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public List<NotesDto> getUserRecycleBinNotes(Integer userId) {
+		List<Notes> byCreatedBy = notesRepository.findByCreatedByAndIsDeletedTrue(userId);
+		List<NotesDto> listDto = byCreatedBy.stream().map(note -> mapper.map(note, NotesDto.class)).toList();
+		return listDto;
 	}
 }
