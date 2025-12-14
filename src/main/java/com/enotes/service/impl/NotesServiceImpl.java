@@ -157,8 +157,6 @@ public class NotesServiceImpl implements NotesService {
 	}
 
 	private void checkCategoryExist(CategoryDto category) throws Exception {
-		// TODO Auto-generated method stub;
-
 		categoryRepo.findById(category.getId())
 				.orElseThrow(() -> new ResourceNotFoundException("category id is invalid"));
 
