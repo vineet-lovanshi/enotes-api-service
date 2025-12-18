@@ -5,8 +5,10 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.enotes.dto.CategoryDto;
+import com.enotes.dto.FavouriteNoteDto;
 import com.enotes.dto.NotesDto;
 import com.enotes.dto.NotesResponse;
+import com.enotes.exception.ResourceNotFoundException;
 import com.enotes.model.FileDetails;
 
 public interface NotesService {
@@ -25,4 +27,11 @@ public interface NotesService {
 	public Boolean restoreNotes(Integer id) throws Exception;
 
 	public List<NotesDto> getUserRecycleBinNotes(Integer userId);
+
+	public void unFavouriteNote(Integer id) throws Exception;
+
+	public void favouriteNote(Integer id) throws Exception;
+
+	public List<FavouriteNoteDto> getFavouriteNote() throws Exception;
+
 }

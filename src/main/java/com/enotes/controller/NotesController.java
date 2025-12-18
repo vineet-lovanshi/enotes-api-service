@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.enotes.dto.FavouriteNoteDto;
 import com.enotes.dto.NotesDto;
 import com.enotes.dto.NotesResponse;
 import com.enotes.model.FileDetails;
@@ -98,4 +99,29 @@ public class NotesController {
 		return CommonUtils.createBuildResponse(notes, HttpStatus.OK);
 
 	}
+
+	@PostMapping("/fav/{noteId}")
+	public ResponseEntity<?> favNotes(@PathVariable Integer noteId) throws Exception {
+		notesService.favouriteNote(noteId);
+		return CommonUtils.createBuildResponseMessage("Added in favourite", HttpStatus.CREATED);
+
+	}
+
+	@GetMapping("/un-fav/{favId}")
+	public ResponseEntity<?> unFavNotes(@PathVariable Integer favId) throws Exception {
+		notesService.unFavouriteNote(favId);
+		return CommonUtils.createBuildResponseMessage("Removed from favourite", HttpStatus.OK);
+
+	}
+
+	@GetMapping("/fav-notes")
+	public ResponseEntity<?> getFavNotes() throws Exception {
+		List<FavouriteNoteDto> favouriteNote = notesService.getFavouriteNote();
+		if (ObjectUtils.isEmpty(favouriteNote)) {
+			return ResponseEntity.noContent().build();
+		}
+		return CommonUtils.createBuildResponse(favouriteNote, HttpStatus.OK);
+
+	}
+
 }

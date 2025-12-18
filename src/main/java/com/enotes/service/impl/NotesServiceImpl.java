@@ -29,11 +29,14 @@ import com.enotes.dto.NotesDto.CategoryDto;
 import com.enotes.dto.NotesDto.FileDto;
 import com.enotes.dto.NotesResponse;
 import com.enotes.exception.ResourceNotFoundException;
+import com.enotes.model.FavouriteNote;
 import com.enotes.model.FileDetails;
 import com.enotes.model.Notes;
 import com.enotes.repository.CategoryRepository;
+import com.enotes.repository.FavouriteNotesRepository;
 import com.enotes.repository.FileRepository;
 import com.enotes.repository.NotesRepository;
+import com.enotes.dto.FavouriteNoteDto;
 import com.enotes.service.NotesService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -41,6 +44,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class NotesServiceImpl implements NotesService {
 	@Autowired
 	private NotesRepository notesRepository;
+
+	@Autowired
+	private FavouriteNotesRepository favouriteNotesRepository;
 
 	@Autowired
 	private ModelMapper mapper;
@@ -105,10 +111,11 @@ public class NotesServiceImpl implements NotesService {
 
 			String originalFilename = file.getOriginalFilename();
 			String extension = FilenameUtils.getExtension(originalFilename);
-			List<String> extensionAllow = Arrays.asList("pdf", "xlsx", "jpg","png");
+			List<String> extensionAllow = Arrays.asList("pdf", "xlsx", "jpg", "png");
 
 			if (!extensionAllow.contains(extension)) {
-				throw new IllegalArgumentException("Invalid file format ! uplaod only .pdf , .xlsx , .jpg or .png format");
+				throw new IllegalArgumentException(
+						"Invalid file format ! uplaod only .pdf , .xlsx , .jpg or .png format");
 			}
 
 			String rendomString = UUID.randomUUID().toString();
@@ -228,5 +235,29 @@ public class NotesServiceImpl implements NotesService {
 		List<Notes> byCreatedBy = notesRepository.findByCreatedByAndIsDeletedTrue(userId);
 		List<NotesDto> listDto = byCreatedBy.stream().map(note -> mapper.map(note, NotesDto.class)).toList();
 		return listDto;
+	}
+
+	@Override
+	public void favouriteNote(Integer id) throws Exception {
+		int userId = 2;
+		Notes notes = notesRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Notes not found & Invalid id"));
+		FavouriteNote favouriteNote = FavouriteNote.builder().userId(userId).notes(notes).build();
+		FavouriteNote save = favouriteNotesRepository.save(favouriteNote);
+	}
+
+	@Override
+	public void unFavouriteNote(Integer favNoteId) throws Exception {
+		FavouriteNote favouriteNote = favouriteNotesRepository.findById(favNoteId)
+				.orElseThrow(() -> new ResourceNotFoundException("Notes not found & Invalid id"));
+		favouriteNotesRepository.deleteById(favNoteId);
+	}
+
+	@Override
+	public List<FavouriteNoteDto> getFavouriteNote() throws Exception {
+		int userId = 2;
+		List<FavouriteNote> favouriteNotes = favouriteNotesRepository.findByUserId(userId);
+		return favouriteNotes.stream().map(fn -> mapper.map(fn, FavouriteNoteDto.class)).toList();
+		
 	}
 }
