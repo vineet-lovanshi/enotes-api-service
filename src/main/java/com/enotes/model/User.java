@@ -35,7 +35,7 @@ public class User {
 	private String passowrd;
 
 	private String mobileNo;
-	
+
 	@OneToMany(cascade = CascadeType.ALL)
 	private List<Role> roles;
 }
