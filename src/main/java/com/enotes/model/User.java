@@ -2,6 +2,8 @@ package com.enotes.model;
 
 import java.util.List;
 
+import org.hibernate.annotations.ManyToAny;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,6 +38,6 @@ public class User {
 
 	private String mobileNo;
 
-	@OneToMany(cascade = CascadeType.ALL)
+	@ManyToAny
 	private List<Role> roles;
 }
