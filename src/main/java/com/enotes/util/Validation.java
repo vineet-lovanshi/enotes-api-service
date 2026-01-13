@@ -15,15 +15,20 @@ import com.enotes.dto.TodoDto;
 import com.enotes.dto.TodoDto.StatusDto;
 import com.enotes.dto.UserDto;
 import com.enotes.enums.TodoStatus;
+import com.enotes.exception.ExixtDataException;
 import com.enotes.exception.ResourceNotFoundException;
 import com.enotes.exception.ValidationException;
 import com.enotes.repository.RoleRepository;
+import com.enotes.repository.UserRepository;
 
 @Component
 public class Validation {
 
 	@Autowired
 	private RoleRepository roleRepo;
+
+	@Autowired
+	private UserRepository userRepository;
 
 	public void categoryValidation(CategoryDto categoryDto) {
 
@@ -104,6 +109,11 @@ public class Validation {
 		}
 		if (!StringUtils.hasText(userDto.getEmail()) || !userDto.getEmail().matches(Constant.EMAIL_REGEX)) {
 			throw new IllegalArgumentException("Email is invalid");
+		} else {
+			Boolean existEmail = userRepository.existsByEmail(userDto.getEmail());
+			if (existEmail) {
+				throw new ExixtDataException("Email id allready exist");
+			}
 		}
 		if (!StringUtils.hasText(userDto.getMobileNo()) || !userDto.getMobileNo().matches(Constant.MOBNO_REGEX)) {
 			throw new IllegalArgumentException("Mobile No. is invalid");
