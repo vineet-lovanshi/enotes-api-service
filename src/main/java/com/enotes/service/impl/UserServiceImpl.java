@@ -1,6 +1,7 @@
 package com.enotes.service.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.util.ObjectUtils;
 
 import com.enotes.dto.EmailRequest;
 import com.enotes.dto.UserDto;
+import com.enotes.model.AccountStatus;
 import com.enotes.model.Role;
 import com.enotes.model.User;
 import com.enotes.repository.RoleRepository;
@@ -42,6 +44,10 @@ public class UserServiceImpl implements UserService {
 		User mapUser = mapper.map(userDto, User.class);
 		setRole(userDto, mapUser);
 
+		AccountStatus accountStatus = AccountStatus.builder().isActive(false)
+				.varificationCode(UUID.randomUUID().toString()).build();
+
+		mapUser.setStatus(accountStatus);
 		User saveUser = userRepository.save(mapUser);
 
 		if (!ObjectUtils.isEmpty(saveUser)) {
@@ -54,11 +60,14 @@ public class UserServiceImpl implements UserService {
 
 	private void emailSend(User saveUser) throws Exception {
 		String message = "Hi,<b>" + saveUser.getFirstName() + "</b> " + "<br> Your account register sucessfully.<br>"
-				+ "<br> Click the below link verify & Active your account <br>" + "<a href='#'>Click Here</a> <br><br>"
-				+ "Thanks,<br>Enotes.com";
+				+ "<br> Click the below link verify & Active your account <br>"
+				+ "<a href='[[url]]'>Click Here</a> <br><br>" + "Thanks,<br>Enotes.com";
 
-		EmailRequest emailRequest = EmailRequest.builder().to(saveUser.getEmail())
-				.title("From Enotes Java App").subject("Account Created Success").message(message).build();
+		message = message.replace("[[url]]",
+				"http://localhost:8080/api/v1/home/verify?uid=" + saveUser.getId() + "&&code=" + saveUser.getStatus().getVarificationCode());
+
+		EmailRequest emailRequest = EmailRequest.builder().to(saveUser.getEmail()).title("From Enotes Java App")
+				.subject("Account Created Success").message(message).build();
 
 		emailService.sendEmail(emailRequest);
 	}
