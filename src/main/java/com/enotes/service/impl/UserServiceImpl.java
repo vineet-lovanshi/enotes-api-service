@@ -5,12 +5,19 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import com.enotes.config.security.CustomeUserDetails;
 import com.enotes.dto.EmailRequest;
 import com.enotes.dto.UserDto;
 import com.enotes.model.AccountStatus;
+import com.enotes.model.LoginRequest;
+import com.enotes.model.LoginResponse;
 import com.enotes.model.Role;
 import com.enotes.model.User;
 import com.enotes.repository.RoleRepository;
@@ -36,6 +43,12 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private EmailService emailService;
 
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
+
 	@Override
 	public boolean registerUser(UserDto userDto) throws Exception {
 
@@ -48,6 +61,7 @@ public class UserServiceImpl implements UserService {
 				.varificationCode(UUID.randomUUID().toString()).build();
 
 		mapUser.setStatus(accountStatus);
+		mapUser.setPassowrd(passwordEncoder.encode(mapUser.getPassowrd()));
 		User saveUser = userRepository.save(mapUser);
 
 		if (!ObjectUtils.isEmpty(saveUser)) {
@@ -63,8 +77,8 @@ public class UserServiceImpl implements UserService {
 				+ "<br> Click the below link verify & Active your account <br>"
 				+ "<a href='[[url]]'>Click Here</a> <br><br>" + "Thanks,<br>Enotes.com";
 
-		message = message.replace("[[url]]",
-				"http://localhost:8080/api/v1/home/verify?uid=" + saveUser.getId() + "&&code=" + saveUser.getStatus().getVarificationCode());
+		message = message.replace("[[url]]", "http://localhost:8080/api/v1/home/verify?uid=" + saveUser.getId()
+				+ "&&code=" + saveUser.getStatus().getVarificationCode());
 
 		EmailRequest emailRequest = EmailRequest.builder().to(saveUser.getEmail()).title("From Enotes Java App")
 				.subject("Account Created Success").message(message).build();
@@ -76,6 +90,21 @@ public class UserServiceImpl implements UserService {
 		List<Integer> reqRoleId = userDto.getRoles().stream().map(r -> r.getId()).toList();
 		List<Role> roles = roleRepository.findAllById(reqRoleId);
 		user.setRoles(roles);
+	}
+
+	@Override
+	public LoginResponse loginUser(LoginRequest loginRequest) {
+
+		Authentication authenticate = authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+		if (authenticate.isAuthenticated()) {
+			CustomeUserDetails customeUserDetails = (CustomeUserDetails) authenticate.getPrincipal();
+			String tokenString = "jbcbcbqkwnjhbhecbniuhwbcbc";
+			LoginResponse loginResponse = LoginResponse.builder()
+					.user(mapper.map(customeUserDetails.getUser(), UserDto.class)).token(tokenString).build();
+			return loginResponse;
+		}
+		return null;
 	}
 
 }
